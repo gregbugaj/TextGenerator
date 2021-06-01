@@ -19,7 +19,6 @@ class Const:
 
     def __setattr__(self, key, value):
         if key in self.__dict__.keys():
-            # 存在性验证
             raise self.ConstError("Can't change a const variable: '%s'" % key)
         self.__dict__[key] = value
 

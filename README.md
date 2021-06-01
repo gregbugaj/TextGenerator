@@ -1,25 +1,22 @@
 # TextGenerator
 
 - This is a tools for ocr dataset, text detection, fonts classification dataset generate.
-- 这是一个用来生成ocr数据，文字检测数据，字体识别的最方便的工具
+- This is the most convenient tool for generating ocr data, text detection data, and font recognition
+## Realized functions:
 
-## 实现的功能：
+-Generate text maps with different fonts, font sizes, colors, and rotation angles based on different corpora
+-Support multi-process fast generation
+-The text map is filled into the layout block according to the specified layout mode
+-Find smooth areas in the image as layout blocks
+-Support the extraction and export of blocks in the text area (export json file, txt file and picture file, can generate voc data, ICDAR_LSVT data set format!)
+-Support annotations for each text level (stored in the json file of lsvt)
+-Support users to configure various generation configurations (image reading, generation path, various probabilities)
+## Effect preview
 
-- 生成基于不同语料的，不同字体、字号、颜色、旋转角度的文字贴图
-- 支持多进程快速生成
-- 文字贴图按照指定的布局模式填充到布局块中
-- 在图像中寻找平滑区域当作布局块
-- 支持文字区域的图块抠取导出（导出json文件，txt文件和图片文件，可生成voc数据，ICDAR_LSVT数据集格式!）
-- 支持每个文字级别的标注(存入了lsvt的json文件中)
-- 支持用户自己配置各项生成配(图像读取，生成路径，各种概率)
-
-## 效果预览
-
-### 生成图片示例:
+### Generate picture example:
 
 ![](img/pic_7f6cb78368edaf8347a8f0ce7e5a46c2df4f3ddd.jpg)
-
-### 文字贴图示例:
+### Text map example:
 
 ![](img/fragment_6fc1b6ac180755dea3dfe711550251708b5e2ce519.jpg)
 
@@ -29,17 +26,15 @@
 
 ![](img/fragment_f712bd7187d446b5fd5daf0ee0c6cb33ad26f98710.jpg)
 
-### 旋转矩形示例
+### Rotating rectangle example
 
 ![](img/rotate_rect.png)
 
-### 单个文字包围框示例
+### Example of a single text bounding box
 
 ![](img/char_box.png)
 
-### 使用方式
-
-- 环境安装(Python3.6+，建议使用conda环境)
+-Environment installation (Python3.6+, conda environment is recommended)
         
     ```
     # step 1
@@ -48,15 +43,16 @@
     sh make.sh
     ```
   
-- 编辑配置文件`config.yml`（可选）
+-Edit the configuration file `config.yml` (optional)
     
-- 执行生成脚本
+- Execute build script
 
     ```
     python3 run.py
     ```
   
-- 生成的数据
+-Generated data
     
-    生成的数据存放在`config.yml`中的`provider> layout> out_put_dir`指定的目录下。
-     
+    The generated data is stored in the directory specified by `provider> layout> out_put_dir` in `config.yml`.
+
+

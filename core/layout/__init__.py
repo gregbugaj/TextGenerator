@@ -90,7 +90,7 @@ class TextBlock(Block):
         super().__init__(text_img.img, inner_x, inner_y, margin=margin, rotate_angle=rotate_angle)
         self.rotate_angle = rotate_angle
         self.text_img = text_img
-        self.char_boxes = self.char_box_rotate()  # 更新为矩阵旋转变换后的位置
+        self.char_boxes = self.char_box_rotate()  # Update to the position after matrix rotation transformation
 
     def char_box_rotate(self):
         char_boxes = list()
@@ -152,12 +152,12 @@ class BlockGroup:
 
     def auto_append_block(self):
         """
-        自动添加block
+        Automatically add block
         :return:
         """
         from core.layout.strategy import strategy_controller as sc
         strategy = sc.pick(self.strategy_list)
-        # 尝试生成3次 提高贴图成功率
+       
         retry_times = 5
         while retry_times > 0:
             block = self._gen_block(strategy)
@@ -179,7 +179,7 @@ class BlockGroup:
 
     def _gen_block(self, strategy: Strategy):
         """
-        生成一个block
+        Generate a block
         :return:
         """
 
@@ -196,7 +196,7 @@ class BlockGroup:
 
     def preview(self, draw_rect=False):
         """
-        预览
+        Preview
         :param draw_rect:
         :return:
         """
@@ -205,9 +205,9 @@ class BlockGroup:
 
     def render(self, draw_rect=False, on_origin=True):
         """
-        渲染
+        Rendering
         :param draw_rect:
-        :param on_origin: 是否在原图上渲染
+        :param on_origin: Whether to render on the original image
         :return:
         """
         mode = "RGBA"
@@ -268,7 +268,7 @@ class Layout:
 
     def get_all_block_list(self):
         """
-        获取所有的block
+        Get all the blocks
         :return:
         """
         all_block_list = []
@@ -277,10 +277,10 @@ class Layout:
             all_block_list.extend(block_list)
         return all_block_list
 
-    @count_time(tag="自动生成文字贴图")
+    @count_time(tag="Automatically generate text maps")
     def gen(self):
         """
-        开始自动生成
+        Start automatic generation
         :return:
         """
         for index, block_group in enumerate(self.block_group_list):
@@ -290,7 +290,7 @@ class Layout:
 
     def is_empty(self):
         """
-        判断当前图片是否为空
+        Determine whether the current picture is empty
         :return:
         """
         for bg in self.block_group_list:
@@ -298,7 +298,7 @@ class Layout:
                 return False
         return True
 
-    @count_time(tag="区块片收集")
+    @count_time(tag="Block collection")
     def collect_block_fragment(self):
         fragment_info_list = []
         for block in self.get_all_block_list():
@@ -382,36 +382,10 @@ class Layout:
 
     def render(self, draw_rect=False):
         """
-        渲染
+        Render
         :param draw_rect:
         :return:
         """
         for block_group in self.block_group_list:
             block_group.render(draw_rect=draw_rect, on_origin=True)
 
-
-if __name__ == '__main__':
-    # from service import text_img_provider
-    # from service.provider.TextImgProvider import text_img_generator
-
-    bg_img_path = "/Users/lijianan/Documents/workspace/github/TextGenerator/data/img/spider_man.jpeg"
-
-    bg_img = Image.open(bg_img_path)
-    layout = Layout(bg_img=bg_img, group_box_list=[
-        (0, 0, 500, 200),
-        (30, 300, 800, 800)
-    ])
-    layout.gen()
-    layout.show(draw_rect=True)
-
-    # # 获取一个字体文件的路径
-    # fp = text_img_provider.next_font_path()
-    #
-    # # 导出文本图片
-    # text_img = text_img_generator.gen_text_img(text_img_provider, "hello world", color=const.COLOR_BLUE, font_path=fp)
-    #
-    # text_block = TextBlock(text_img=text_img, inner_x=200, inner_y=200, margin=40, rotate_angle=15)
-    # bg_img_path = "/Users/lijianan/Documents/workspace/github/TextGenerator/data/img/spider_man.jpeg"
-    # bg_img = Image.open(bg_img_path)
-    # layout = Layout(bg_img=bg_img, block_list=[])
-    # layout.preview(draw_rect=True)

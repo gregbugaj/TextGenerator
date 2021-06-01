@@ -162,7 +162,7 @@ class TextImgProvider(NextBlockGenerator):
 
     def auto_gen_next_img(self, width, height, strategy, bg_img, block_list):
         """
-        自动生成下一个文本贴图
+        Automatically generate the next text map
         :return:
         """
         from service import text_provider
@@ -170,7 +170,8 @@ class TextImgProvider(NextBlockGenerator):
         fp = self.next_font_path()
 
         if isinstance(strategy, HorizontalStrategy):
-            orientation = TYPE_ORIENTATION_VERTICAL
+            orientation = TYPE_ORIENTATION_HORIZONTAL
+            # orientation = TYPE_ORIENTATION_VERTICAL
         elif isinstance(strategy, VerticalStrategy):
             orientation = TYPE_ORIENTATION_HORIZONTAL
         elif isinstance(strategy, HorizontalFlowStrategy):
@@ -186,7 +187,6 @@ class TextImgProvider(NextBlockGenerator):
             orientation = Random.random_choice_list(
                 [TYPE_ORIENTATION_VERTICAL, TYPE_ORIENTATION_HORIZONTAL, TYPE_ORIENTATION_HORIZONTAL])
 
-        # 设置字体大小
         if self.font_max_size != 'vaild':
             font_size = Random.random_int(self.font_min_size, self.font_max_size)
         else:
@@ -194,10 +194,10 @@ class TextImgProvider(NextBlockGenerator):
             font_size = Random.random_int(v // 20, v // 10)
             font_size = self.font_min_size if font_size < self.font_min_size else font_size
 
-        # 剔除不存在的文字
+        # Eliminate non-existent text
         text = "".join(filter(lambda c: font_tool.check(c, font_path=fp), text))
         if len(text) >= 2:
-            # 生成文本图片
+            # Generate text image
             align = Random.random_choice_list(
                 [TYPE_ALIGN_MODEL_B, TYPE_ALIGN_MODEL_T, TYPE_ALIGN_MODEL_C])
             text_img = self.gen_text_img(text,

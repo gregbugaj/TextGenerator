@@ -78,7 +78,7 @@ def gen_pic():
 
 def add_label_data(layout_data):
     """
-    写入标签文件
+    Write label file
     :return:
     """
     from service import conf
@@ -89,7 +89,6 @@ def add_label_data(layout_data):
     label_file_path = os.path.join(label_data_dir, "label_{pid}.txt".format(pid=os.getpid()))
     fragment_dir = get_fragment_dir(out_put_dir)
 
-    # 拷贝图片
     fragment_list = layout_data['fragment']
     with open(label_file_path, 'a+') as f:
         for fragment in fragment_list:
@@ -103,7 +102,7 @@ def add_label_data(layout_data):
             line = img_name + "^" + txt + os.linesep
             f.write(line)
     log.info("gen label data success!")
-
+    
 
 def gen_voc(layout_data):
     """
