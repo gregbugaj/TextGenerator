@@ -14,14 +14,14 @@ from utils import log
 TYPE_ORIENTATION_HORIZONTAL = 0
 TYPE_ORIENTATION_VERTICAL = 1
 
-TYPE_ALIGN_MODEL_B = 0  # 文本对齐模式：底部/左边 对齐
-TYPE_ALIGN_MODEL_C = 1  # 文本对齐模式：居中 对齐
-TYPE_ALIGN_MODEL_T = 2  # 文本对齐模式：顶部/右边 对齐
+TYPE_ALIGN_MODEL_B = 0  # Text alignment mode: bottom/left alignment
+TYPE_ALIGN_MODEL_C = 1  # Text alignment mode: center alignment
+TYPE_ALIGN_MODEL_T = 2  # Text alignment mode: top/right alignment
 
 
 class TextImg(BaseImg):
     """
-    字符串图片对象
+    String picture object
     """
 
     def __init__(self,
@@ -73,7 +73,7 @@ class TextImg(BaseImg):
 
     def export(self):
         """
-        数据导出
+        Data output
         :return:
         """
         self.img.save(self.img_path)
@@ -84,7 +84,7 @@ class TextImg(BaseImg):
     @staticmethod
     def load_from_json(file_path):
         """
-        从json文件中加载对象
+        Load objects from json file
         :param file_path:
         :return:
         """
@@ -95,7 +95,7 @@ class TextImg(BaseImg):
 
     def show(self, with_box=False):
         """
-        展示图片
+        Show pictures
         :param with_box:
         :return:
         """
@@ -113,7 +113,7 @@ class TextImg(BaseImg):
 
     def cv_img(self):
         """
-        获取opencv的image对象
+        Get the image object of opencv
         :return:
         """
         image = np.array(self.img)
@@ -122,7 +122,7 @@ class TextImg(BaseImg):
 
     def pil_img(self):
         """
-        获取pillow的image对象
+        Get the image object of pillow
         :return:
         """
         return self.img
@@ -136,7 +136,7 @@ class CharImgEncoder(json.JSONEncoder):
 
 def load_img(img_path):
     """
-    从磁盘上加载图片文件
+    Load image files from disk
     :param img_path:
     :return:
     """
@@ -151,13 +151,13 @@ def calc_bg_size(font_path: str,
                  padding,
                  auto_padding_to_ratio) -> tuple:
     """
-    计算背景尺寸
-    :param font_path: 字体路径
-    :param orientation: 朝向
-    :param char_obj_list: 字符对象
-    :param spacing_rate: 间距 (相对于文字大小的占比)
-    :param padding: 内边距
-    :param auto_padding_to_ratio: 自动 padding 到指定的比例(水平排布是 w/h 竖直排布是 h/w)
+    Calculate background size
+    :param font_path: Font path
+    :param orientation:Towards
+    :param char_obj_list: Character object
+    :param spacing_rate: Spacing (as a percentage of text size)
+    :param padding: Inner margin
+    :param auto_padding_to_ratio: Automatic padding to the specified ratio (horizontal arrangement is w/h, vertical arrangement is h/w)
     :return:
     """
 
@@ -170,24 +170,23 @@ def calc_bg_size(font_path: str,
     for index, char_obj in enumerate(char_obj_list):
         font = ImageFont.truetype(font_path, size=char_obj.font_size)
 
-        # 获取当前字符的背景尺寸
         char_bg_w = 0
         char_bg_h = 0
         try:
             char_bg_w, char_bg_h = font.getsize(char_obj.char)
 
-            # 加上边框尺寸
+            # Add border size
             char_bg_w += char_obj.border_width * 2
             char_bg_h += char_obj.border_width * 2
         except Exception as e:
             traceback.print_exc()
         char_obj.size = (char_bg_w, char_bg_h)
 
-        # 获取当前行文本的最大字符图片的宽高
+        # Get the width and height of the largest character image in the current line of text
         max_char_bg_w = char_bg_w if char_bg_w > max_char_bg_w else max_char_bg_w
         max_char_bg_h = char_bg_h if char_bg_h > max_char_bg_h else max_char_bg_h
 
-        # 判断是否遍历到了最后一个字符的位置
+        # Determine whether the position of the last character has been traversed
         is_last = index == len(char_obj_list) - 1
 
         r = 0 if is_last else spacing_rate
@@ -200,9 +199,9 @@ def calc_bg_size(font_path: str,
             bg_h = max_char_bg_h
 
     if auto_padding_to_ratio > 0:
-        # 自动 padding 到指定尺寸
+        # Automatic padding to the specified size
 
-        # 如果是水平排列 则在左右两边加padding
+        # If it is arranged horizontally, add padding on the left and right sides
         # auto_padding_to_ratio = tw / th
         if orientation == TYPE_ORIENTATION_HORIZONTAL:
             st_w = auto_padding_to_ratio * bg_h
@@ -214,7 +213,7 @@ def calc_bg_size(font_path: str,
                 d = round((st_h - bg_h) / 2)
                 padding = (0, d, 0, d)
 
-        # 如果是竖直排列 则在上下两边加padding
+        # If it is arranged vertically, add padding on the upper and lower sides
         # auto_padding_to_ratio = th / tw
         elif orientation == TYPE_ORIENTATION_VERTICAL:
             st_h = auto_padding_to_ratio * bg_w
@@ -234,7 +233,7 @@ def calc_bg_size(font_path: str,
 
 def draw_text(font_path, bg_w, bg_h, orientation, char_obj_list: List[CharImg], spacing_rate, align_mode, padding):
     """
-    在文字贴图背景上绘制文字
+    Draw text on the text map background
     :param font_path:
     :param bg_w:
     :param bg_h:
@@ -316,7 +315,7 @@ def gen_batch_char_obj(text,
                        border_width=0,
                        border_color=(0, 0, 0, 0)) -> List[CharImg]:
     """
-    生成一批CharImg对象
+    Generate a batch of CharImg objects
     :param text:
     :param color:
     :param font_size:
@@ -342,23 +341,22 @@ def create(char_obj_list: List[CharImg],
            text_img_info_output_dir=""
            ):
     """
-    生成文本图片
-    :param char_obj_list: 字符对象列表
-    :param orientation: 生成的方向
-    :param align_mode: 文本对齐模式
-    :param spacing_rate: 间距 (相对于文字大小的占比)
-    :param padding: 内边距
-    :param auto_padding_to_ratio: 自动padding到指定的比例 <=0 代表不自动padding (水平排布是 w/h 竖直排布是 h/w)
-    :param font_path: 字体文件路径
+    Generate text image
+    :param char_obj_list: Character object list
+    :param orientation: Direction of generation
+    :param align_mode: Text alignment mode
+    :param spacing_rate: Spacing (as a percentage of text size)
+    :param padding: Inner margin
+    :param auto_padding_to_ratio: Automatic padding to the specified ratio <=0 means no automatic padding (horizontal arrangement is w/h, vertical arrangement is h/w)
+    :param font_path: Font file path
     :param text_img_output_dir:
     :param text_img_info_output_dir:
     :return:
     """
-    # 生成文本贴图的透明背景区域
+
     bg_w, bg_h, padding = calc_bg_size(font_path, orientation, char_obj_list, spacing_rate, padding,
                                        auto_padding_to_ratio)
 
-    # 绘制文字
     img = draw_text(font_path, bg_w, bg_h, orientation, char_obj_list, spacing_rate, align_mode, padding)
 
     return TextImg(char_obj_list=char_obj_list,

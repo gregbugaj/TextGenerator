@@ -169,7 +169,7 @@ class SmoothAreaProvider(object):
 
 if __name__ == '__main__':
     smooth = SmoothAreaProvider()
-    image = cv2.imread("/Users/aidaihanati/TezignProject/TextGenerator/6.jpeg")
+    image = cv2.imread("6.jpeg")
     rects = smooth.get_image_rects(image)
     for rect in rects:
         cv2.rectangle(image, (rect[0], rect[1]), (rect[2], rect[3]), (120, 78, 255), 2)

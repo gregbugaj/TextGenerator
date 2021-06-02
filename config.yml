@@ -4,7 +4,7 @@ base:
   # Number of pictures generated in each process
   count_per_process: 20
   # Whether to generate voc data rate
-  gen_voc: True
+  gen_voc: False
   gen_lsvt: True
 
 provider:
@@ -33,11 +33,11 @@ provider:
       # The storage path of the background image of the generated image
       dir: assets/img
       # The probability of selecting the background image on the disk as the background image
-      probability: 0.2
+      probability: 0.5
     # Automatic generated
     - type: from_generate
       # The probability of selecting the automatically generated background image as the background image
-      probability: 0.8
+      probability: 0.5
       width_range: (1000, 1500)
       height_range: (1000, 1500)
 
@@ -50,21 +50,21 @@ provider:
     # Text map json information output path
     text_img_info_output_dir: output/text_img_info
     # Font size
-    font_min_size: 15
+    font_min_size: 12
     # Maximum font size
-    font_max_size: 50
+    font_max_size: 45
     # The probability of using the specified color as the text color (as opposed to automatically picking the color)
-    use_char_common_color_probability: 0.5
+    use_char_common_color_probability: 1.0
     # Specify the optional color list of the font (when generating the font map, the color will be selected from the following color list as the font color)
     char_common_color_list:
       - (0,0,0,255)
-      - (255,0,0,255)
+      # - (255,0,0,255)
     # The width of the text box
     char_border_width: 0
     # The color of the text box
     char_border_color: (255,255,0,255)
     # Automatic padding to the specified ratio of long side/short side
-    auto_padding_to_ratio: 10
+    auto_padding_to_ratio: 5
 
   # Layout configuration
   layout:
@@ -79,5 +79,5 @@ provider:
       - name: HorizontalFlowStrategy
         probability: 0.5
       # - name: RandomPasteStrategy
-      #   probability: 0.1
+      #   probability: 0.2
 

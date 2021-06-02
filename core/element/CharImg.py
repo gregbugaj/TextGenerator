@@ -4,7 +4,7 @@ from core.element.BaseImg import BaseImg
 
 class CharImg(BaseImg):
     """
-    字符图片对象
+    Character picture object
     """
 
     def __init__(self, char, font_size, color, box=(0, 0, 0, 0), size=(0, 0), border_width=0,

@@ -4,9 +4,9 @@ from utils.random_tools import Random
 
 class RandomPasteStrategy(Strategy):
     """
-    随机粘贴策略
+    Random Paste Strategy
     """
-    # 随机种子必须设置为空 否则每次都会贴在同一区域，导致重叠而帖失败
+    # The random seed must be set to empty, otherwise it will be posted in the same area every time, causing overlapping and failed posting
     seed = None
 
     def logic(self, block_group, next_block) -> bool:

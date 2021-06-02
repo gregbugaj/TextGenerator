@@ -20,8 +20,7 @@ import cv2
 
 def list_font_path(font_file_dir):
     """
-    获取所有的字体文件路径
-    :param font_file_dir: 字体文件存放路径
+    :param font_file_dir: Font file storage path
     :return:
     """
     assert os.path.exists(font_file_dir), "font_file_dir is not exist, please check: {font_file_dir}".format(
@@ -44,16 +43,16 @@ class TextImgProvider(NextBlockGenerator):
                  auto_padding_to_ratio=0.0,
                  seed=time.time()):
         """
-        初始化文本图片生成器
-        :param font_file_dir: 字体文件目录
-        :param text_img_output_dir: 文本图片输出目录
-        :param text_img_info_output_dir: 文本图片数据输出目录
-        :param font_min_size: 文本字体大小的最小值
+        Initialize the text image generator
+        :param font_file_dir: Font file directory
+        :param text_img_output_dir: Text and image output directory
+        :param text_img_info_output_dir: Text and image data output directory
+        :param font_min_size: The minimum text font size
         :param use_char_common_color_probability
         :param char_common_color_list
-        :param char_border_width: 字符边框的宽度
-        :param char_border_color: 字符边框的颜色
-        :param auto_padding_to_ratio: 自动padding到指定的比例 <=0 代表不自动padding (水平排布是 w/h 竖直排布是 h/w)
+        :param char_border_width: The width of the character border
+        :param char_border_color: The color of the character border
+        :param auto_padding_to_ratio: Automatic padding to the specified ratio <=0 means no automatic padding (horizontal arrangement is w/h, vertical arrangement is h/w)
         :param seed:
         """
         os.makedirs(text_img_output_dir, exist_ok=True)
@@ -78,7 +77,6 @@ class TextImgProvider(NextBlockGenerator):
 
     def next_font_path(self):
         """
-        获取下一个字体路径
         :return:
         """
         font_path = self.font_file_list[self._font_index]
@@ -115,7 +113,6 @@ class TextImgProvider(NextBlockGenerator):
                              orientation=TYPE_ORIENTATION_HORIZONTAL,
                              align_mode=TYPE_ALIGN_MODEL_C):
         """
-        生成复杂的文本图片
         :param char_obj_list:
         :param font_path:
         :param orientation:
@@ -137,7 +134,7 @@ class TextImgProvider(NextBlockGenerator):
         :return:
         """
         char_common_color_list = self.char_common_color_list
-
+        
         if Random.random_float(0, 1) <= self.use_char_common_color_probability and char_common_color_list:
             return eval(Random.random_choice_list(char_common_color_list))
         else:
@@ -171,7 +168,6 @@ class TextImgProvider(NextBlockGenerator):
 
         if isinstance(strategy, HorizontalStrategy):
             orientation = TYPE_ORIENTATION_HORIZONTAL
-            # orientation = TYPE_ORIENTATION_VERTICAL
         elif isinstance(strategy, VerticalStrategy):
             orientation = TYPE_ORIENTATION_HORIZONTAL
         elif isinstance(strategy, HorizontalFlowStrategy):
@@ -222,28 +218,22 @@ class TextImgProvider(NextBlockGenerator):
 
 
 if __name__ == '__main__':
-    # 使用示例
     from service import init_config
 
     init_config()
     from service import text_img_provider
-
-    # 获取一个字体文件的路径
     fp = text_img_provider.next_font_path()
 
-    # 导出文本图片
     p = text_img_provider.gen_text_img("hello world", color=const.COLOR_BLUE, font_path=fp)
     p.export()
     # p.show()
 
-    # 构造文本图片
     l = []
     l.extend(gen_batch_char_obj("你好啊", const.COLOR_BLUE, font_size=24))
     l.extend(gen_batch_char_obj(" 渣 男 ", const.COLOR_GREEN, font_size=28))
     r = text_img_provider.gen_complex_text_img(l, font_path=fp)
     r.show()
 
-    # 获取文字区域尺寸信息
     bg_w, bg_h = text_img_provider.calc_bg_size(fp, orientation=TYPE_ORIENTATION_HORIZONTAL, char_obj_list=l,
                                                 spacing_rate=0.1)
 
