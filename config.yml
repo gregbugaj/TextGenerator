@@ -1,11 +1,12 @@
 base:
   # Number of processes started
-  process_count: 2
+  process_count: 5
   # Number of pictures generated in each process
-  count_per_process: 20
+  count_per_process: 1000
   # Whether to generate voc data rate
   gen_voc: False
-  gen_lsvt: True
+  gen_lsvt: False
+  gen_icdar: True
 
 provider:
   # Select the configuration of the corpus
@@ -18,7 +19,7 @@ provider:
       # How to read the corpus (read line by line: line, read word by word: word)
       type: line
       # Generated text length interval
-      len_range: (2,28)
+      len_range: (1,32)
       
   # Candidate area generation configuration
   smooth_area:
@@ -33,13 +34,7 @@ provider:
       # The storage path of the background image of the generated image
       dir: assets/img
       # The probability of selecting the background image on the disk as the background image
-      probability: 0.5
-    # Automatic generated
-    - type: from_generate
-      # The probability of selecting the automatically generated background image as the background image
-      probability: 0.5
-      width_range: (1000, 1500)
-      height_range: (1000, 1500)
+      probability: 1.0
 
   # Text map configuration
   text_img:
@@ -50,9 +45,9 @@ provider:
     # Text map json information output path
     text_img_info_output_dir: output/text_img_info
     # Font size
-    font_min_size: 12
+    font_min_size: 18
     # Maximum font size
-    font_max_size: 45
+    font_max_size: 32
     # The probability of using the specified color as the text color (as opposed to automatically picking the color)
     use_char_common_color_probability: 1.0
     # Specify the optional color list of the font (when generating the font map, the color will be selected from the following color list as the font color)
@@ -64,14 +59,14 @@ provider:
     # The color of the text box
     char_border_color: (255,255,0,255)
     # Automatic padding to the specified ratio of long side/short side
-    auto_padding_to_ratio: 5
+    auto_padding_to_ratio: 0
 
   # Layout configuration
   layout:
     # Path to output layout file
     out_put_dir: output
     # Texture rotation angle interval
-    rotate_angle_range: (-8, 8)
+    rotate_angle_range: (-4, 4)
     # Various layout modes and their probability of selection
     strategy_list:
       - name: HorizontalStrategy

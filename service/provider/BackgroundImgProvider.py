@@ -19,7 +19,8 @@ class DirImageGen(object):
 
         :param character_seq:
         :param batch_size:
-        """
+        """        
+        self.augmentor = BackgroundImageAugmentor()
         self._image_list = image_list
         # random.shuffle(self.character_seq)
         self._len_range = len_range
@@ -32,7 +33,7 @@ class DirImageGen(object):
             if seek == self._imgs_length:
                 seek = 0
             print("test:", self._image_list[seek])
-            yield cv2.imread(self._image_list[seek])
+            yield self.augmentor.augment(cv2.imread(self._image_list[seek]))
             seek += 1
 
 
@@ -44,6 +45,7 @@ class GenrateGaussImage(object):
         :param width_range: generate image width size range
         :param height_range: generate image height size range
         """
+        self.augmentor = BackgroundImageAugmentor()
         self._width_range = width_range
         self._height_range = height_range
         self.get_next = self.get_gauss_image()
@@ -72,6 +74,7 @@ class GenrateGaussImage(object):
         if k_size <= 3:
             sigma = Random.random_choice_list(sigmas)
         img = cv2.GaussianBlur(img, (k_size, k_size), sigma)
+        img = self.augmentor.augment(img)
         return img
 
 
@@ -169,3 +172,99 @@ class BackgroundImgProvider(object):
 
     def generator(self):
         return self.gen.__next__()
+
+class BackgroundImageAugmentor(object):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def augment(self, img):
+
+        if True:
+            return img
+        noisy_img = img.copy()
+        h = noisy_img.shape[0]
+        w = noisy_img.shape[1]
+
+        noise = cv2.threshold(noisy_img, 128, 255, cv2.THRESH_BINARY)[1]
+        return noise
+        print('Augmenting image : {}'.format(noisy_img.shape))
+
+        vertical_bool = {'left': np.random.choice([0,1], p =[0.3, 0.7]), 'right': np.random.choice([0,1])} # [1 or 0, 1 or 0] whether to make vertical left line on left and right side of the image
+        for left_right, bool_ in vertical_bool.items():
+            if bool_:
+                print('left_right: ', left_right)
+                if left_right == 'left':
+                    v_start_x = np.random.randint(5, int(noisy_img.shape[1]*0.06))
+                else:
+                    v_start_x = np.random.randint(int(noisy_img.shape[1]*0.95), noisy_img.shape[1] - 5)
+
+                v_start_y = np.random.randint(0, int(noisy_img.shape[0]*0.06))
+                v_end_y   = np.random.randint(int(noisy_img.shape[0]*0.95), noisy_img.shape[0])
+
+                y_points = list(range(v_start_y, v_end_y + 1))
+                y_points_black_prob = np.random.choice([0,1], size = len(y_points), p = [0.2, 0.8])
+
+                for idx, y in enumerate(y_points):
+                    if y_points_black_prob[idx]:
+                        noisy_img[y, v_start_x - np.random.randint(2): v_start_x + np.random.randint(2)] = np.random.randint(0,30)
+
+        text_height=12
+        y_line_list=[]
+
+        y_line_count = np.random.randint(1, 8)
+        for y in range(0, y_line_count):
+            y_line_list.append(np.random.randint(noisy_img.shape[0]))
+
+        if True or np.random.choice([True, False], p = [0.60, 0.40]):
+            # adding horizontal line (noise)
+            for y_line in y_line_list: 
+                # samples the possibility of adding a horizontal line
+                add_horizontal_line = np.random.choice([0, 1], p = [0.5, 0.5])
+                if not add_horizontal_line:
+                    continue
+
+                # shift y_line randomly in the y-axis within a defined limit
+                limit = int(text_height*0.3)
+                if limit == 0: # this happens when the text used for getting the text height is '-', ',', '=' and other little symbols like these 
+                    limit = 10
+                y_line += np.random.randint(-limit, limit)
+
+                h_start_x = np.random.randint(0, noisy_img.shape[1])                           # min x of the horizontal line
+                h_end_x   = np.random.randint(int(noisy_img.shape[1]*0.8), noisy_img.shape[1]) # max x of the horizontal line
+                h_length = h_end_x - h_start_x + 1
+                num_h_lines = np.random.randint(10,30) # partitions to be made in the horizontal line (necessary to make it look like naturally broken lines)
+                h_lines = []
+                h_start_temp = h_start_x
+                next_line = True
+
+                num_line = 0
+                while (next_line) and (num_line < num_h_lines):
+                    if h_start_temp < h_end_x:
+                        h_end_temp = np.random.randint(h_start_temp + 1, h_end_x + 1)
+                        if h_end_temp < h_end_x:
+                            h_lines.append([h_start_temp, h_end_temp]) 
+                            h_start_temp = h_end_temp + 1
+                            num_line += 1
+                        else:
+                            h_lines.append([h_start_temp, h_end_x]) 
+                            num_line += 1
+                            next_line = False
+                    else:
+                        next_line = False
+
+                for h_line in h_lines:
+                    use_solid_line = np.random.choice([0, 1], p = [0.5, 0.5])
+                    col = np.random.choice(['black', 'white'], p = [0.95, 0.05]) # probabilities of line segment being a solid one or a broken one
+                    if True or col == 'black':
+                        x_points = list(range(h_line[0], h_line[1] + 1))
+                        x_points_black_prob = np.random.choice([0,1], size = len(x_points), p = [0, 1])
+
+                        for idx, x in enumerate(x_points):
+                            if True or x_points_black_prob[idx]:
+                                if use_solid_line:                    
+                                    noisy_img[y_line : y_line + 1, x] = np.random.randint(0,30)  
+                                else:
+                                    noisy_img[y_line - np.random.randint(2): y_line + np.random.randint(2), x] = np.random.randint(0, 30)  
+
+        noise = cv2.threshold(noisy_img, 128, 255, cv2.THRESH_BINARY)[1]
+        return noise

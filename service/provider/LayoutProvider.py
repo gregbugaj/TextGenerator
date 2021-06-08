@@ -32,7 +32,7 @@ def layout_factory(bg_img: Image.Image,
                    strategy_list
                    ) -> Layout:
     """
-    生成layout的工厂方法
+    Factory method for generating layout
     :param bg_img:
     :param group_box_list:
     :param out_put_dir:
@@ -52,7 +52,7 @@ def layout_factory(bg_img: Image.Image,
 
 def gen_group_box_list(bg_img):
     """
-    生成候选区
+    Generate candidate area
     :param bg_img:
     :return:
     """
@@ -71,7 +71,7 @@ def gen_group_box_list(bg_img):
                                int(box[1] * rh),
                                int(box[2] * rw),
                                int(box[3] * rh)])
-    # 如果智能候选区域为空，则随机生成候选区
+    # If the smart candidate area is empty, the candidate area is randomly generated
     if not group_box_list:
         group_box_list = test_gen_group_box(bg_img)
     return group_box_list
@@ -79,7 +79,7 @@ def gen_group_box_list(bg_img):
 
 def test_gen_group_box(bg_img):
     """
-    临时用来生成候选区域的方法，等智能候选区选择算法补充之后，将此处逻辑替换掉
+    Temporarily used to generate candidate regions. After the smart candidate region selection algorithm is supplemented, replace the logic here
     :param bg_img:
     :return:
     """

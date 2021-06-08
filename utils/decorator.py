@@ -4,8 +4,8 @@ from utils import log
 
 def singleton(cls):
     """
-    单例模式装饰器
-    使用方式：
+    Singleton pattern decorator
+    How to use:
         @Singleton
         class A(object):
             pass
@@ -26,9 +26,9 @@ def singleton(cls):
 def count_time(tag=""):
     def ctime(func):
         def wrapper(*args, **kwargs):
-            tic = time.time()  # 程序开始时间
+            tic = time.time()  # Program start time
             r = func(*args, **kwargs)
-            toc = time.time()  # 程序结束时间
+            toc = time.time()  # Program end time
             cost = toc - tic
             log.info("[ cost_time ] {tag} {func_name} > {cost}".format(tag=tag, func_name=func.__name__, cost=cost))
             return r

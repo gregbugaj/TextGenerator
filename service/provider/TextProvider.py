@@ -59,7 +59,12 @@ class RandomCorpusGen(object):
                 char_str = self._random_crop(char_str)
             elif len(char_str) < self._len_range[0]:
                 char_str = self._random_add(char_str)
-            yield char_str
+            
+            if random.randint(0, 6) >= 3:
+                yield char_str
+            else :
+                yield char_str.upper()
+                
             seek += 1
 
 
@@ -92,6 +97,7 @@ class RandomCharacterGen(object):
             len_seq = len(ret_character_seq)
             if random.randint(0, 6) >= 4 and 7 < len_seq < 13:
                 ret_character_seq.insert(random.randint(2, len_seq - 1), ' ')
+
 
             yield ''.join(ret_character_seq)
             seek += batch_size

@@ -1,4 +1,6 @@
-from PIL import Image, ImageDraw
+import PIL
+from service.base import get_mask_data_dir
+from PIL import Image, ImageDraw, ImageOps
 from constant import const
 from utils.decorator import count_time
 from utils import log
@@ -175,7 +177,7 @@ class BlockGroup:
                         ))
             if not r:
                 retry_times -= 1
-                log.info("retry auto append block")
+                # log.info("retry auto append block")
 
     def _gen_block(self, strategy: Strategy):
         """
@@ -211,6 +213,7 @@ class BlockGroup:
         :return:
         """
         mode = "RGBA"
+        # draw_rect=True
         if not self.bg_img:
             bg_img = Image.new(mode, size=(self.width, self.height))
         else:
@@ -219,10 +222,15 @@ class BlockGroup:
             else:
                 bg_img = self.bg_img.copy()
         draw = ImageDraw.Draw(bg_img, mode)
+
+        mask_img = self.bg_img.copy()
+        mask_img = Image.new('RGBA', self.bg_img.size, (255, 255, 255, 0))
+
         for block in self.block_list:
             img = block.get_img()
             mask = block.get_alpha_mask()
             bg_img.paste(img, block.inner_box, mask=mask)
+            mask_img.paste(img, block.inner_box)
 
             if draw_rect:
                 draw.rectangle(xy=block.outer_box, width=1, outline=const.COLOR_RED)
@@ -231,21 +239,35 @@ class BlockGroup:
                 rotate_rect_tuple = list()
                 for point in rotate_rect:
                     rotate_rect_tuple.append((point[0], point[1]))
-                draw.polygon(xy=rotate_rect_tuple, fill=1, outline=(0, 32, 178))
+                draw.polygon(xy=rotate_rect_tuple, fill=1, outline=(0, 32, 178)) # Bounding box for the text
                 if isinstance(block, TextBlock):
                     char_boxes = block.get_char_boxes()
                     for box in char_boxes:
                         rotate_rect_tuple = list()
                         for point in box:
                             rotate_rect_tuple.append((point[0], point[1]))
-                        draw.polygon(xy=rotate_rect_tuple, fill=0, outline=(255, 0, 153))
+                        draw.polygon(xy=rotate_rect_tuple, fill=0, outline=(255, 0, 153))# Bounding box for the characted
 
 
         if draw_rect:
             draw.rectangle(xy=self.group_box, width=0, outline=const.COLOR_TRANSPARENT,
                            fill=const.COLOR_HALF_TRANSPARENT)
         sub_img = bg_img.crop(self.group_box)
-        return sub_img
+
+        name = hashlib.sha1(mask_img.tobytes()).hexdigest()
+        pic_name = "pic_" + name + ".png"
+        pic_dir ='/tmp/pics'
+
+        # convert from RGBA->RGB 
+        background = Image.new('RGB', mask_img.size, (255,255,255))
+        background.paste(mask_img, mask = mask_img.split()[3])
+        inv_img = ImageOps.invert(background)
+
+        pic_path = os.path.join(pic_dir, pic_name)
+        with open(pic_path, 'wb') as f:
+            inv_img.save(f, "png")
+
+        return sub_img, inv_img
 
 
 class Layout:
@@ -301,16 +323,32 @@ class Layout:
     @count_time(tag="Block collection")
     def collect_block_fragment(self):
         fragment_info_list = []
+
+        mask_img = self.bg_img.copy()
+        mask_img = Image.new('RGBA', self.bg_img.size, (255, 255, 255, 0))
+            
         for block in self.get_all_block_list():
             fragment_img = block.crop_self(self.bg_img)
             fragment_box = block.inner_box
             fragment_rotate_box = block.img_rotate_box.tolist()
             fragment_data = block.get_data()
+              
+            img = block.get_img()
+            mask = block.get_alpha_mask()
+            mask_img.paste(img, block.inner_box)
+            # convert from RGBA->RGB 
+            background = Image.new('RGB', mask_img.size, (255,255,255))
+            background.paste(mask_img, mask = mask_img.split()[3])
+            inv_img = ImageOps.invert(background)
+      
+            print(fragment_img)
+            print(inv_img)
             if isinstance(block, TextBlock):
                 char_boxes = block.get_char_boxes()
                 orientation = block.get_orientation()
                 item = {
                     "img": fragment_img,
+                    "inv_img": inv_img,
                     "box": fragment_box,
                     "rotate_box": fragment_rotate_box,
                     "char_boxes": char_boxes,
@@ -322,6 +360,7 @@ class Layout:
                 orientation = block.get_orientation()
                 item = {
                     "img": fragment_img,
+                    "inv_img": inv_img,
                     "box": fragment_box,
                     "rotate_box": fragment_rotate_box,
                     "data": fragment_data,
@@ -340,14 +379,18 @@ class Layout:
         pic_dir = get_pic_dir(self.out_put_dir)
         fragment_dir = get_fragment_dir(self.out_put_dir)
         data_dir = get_data_dir(self.out_put_dir)
+        mask_dir = get_mask_data_dir(self.out_put_dir)
 
         os.makedirs(pic_dir, exist_ok=True)
         os.makedirs(fragment_dir, exist_ok=True)
         os.makedirs(data_dir, exist_ok=True)
+        os.makedirs(mask_dir, exist_ok=True)
 
         name = hashlib.sha1(self.bg_img.tobytes()).hexdigest()
 
         pic_name = "pic_" + name + ".png"
+        # pic_name = "pic_" + name + ".jpg"
+
         pic_path = os.path.join(pic_dir, pic_name)
         with open(pic_path, 'wb') as f:
             self.bg_img.save(f)
@@ -356,16 +399,33 @@ class Layout:
         result['height'] = self.bg_img.height
         result['fragment'] = []
 
+        mask_img = self.bg_img.copy()
+        mask_img = Image.new('RGB', self.bg_img.size, (255, 255, 255))
+
         for index, fragment in enumerate(self.collect_block_fragment()):
-            fragment_img = fragment['img']
+            inv_img = fragment['inv_img']
+            fragment_img = fragment['img']            
             fragment_img_name = "fragment_" + name + str(index) + ".png"
             fragment_img_path = os.path.join(fragment_dir, fragment_img_name)
             with open(fragment_img_path, 'wb') as f:
                 fragment_img.save(f)
-            fragment.pop("img")
-            fragment['fragment_name'] = fragment_img_name
 
+            # inv_img_path = os.path.join(mask_dir, fragment_img_name)
+            # with open(inv_img_path, 'wb') as f:
+            #     inv_img.save(f)
+
+            mask_img.paste(inv_img, (0, 0))
+
+            fragment.pop("img")
+            fragment.pop("inv_img")
+
+            fragment['fragment_name'] = fragment_img_name
             result['fragment'].append(fragment)
+
+
+        mask_path = os.path.join(mask_dir, pic_name)
+        with open(mask_path, 'wb') as f:
+            mask_img.save(f)
 
         json_file_name = name + ".json"
         json_file_path = os.path.join(data_dir, json_file_name)

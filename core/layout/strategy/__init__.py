@@ -1,6 +1,5 @@
 def check_two_box_is_overlap(a_box, b_box):
     """
-    检查两个区域是否有交集
     :param a_box:
     :param b_box:
     :return:

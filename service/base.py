@@ -3,6 +3,8 @@ from utils import log
 import shutil
 import json
 import os
+import cv2
+import  numpy as np
 
 
 def get_pic_dir(out_put_dir):
@@ -34,34 +36,47 @@ def get_voc_data_dir(out_put_dir):
 
 def get_lsvt_data_dir(out_put_dir):
     lsvt_data = os.path.join(out_put_dir, "lsvt_data")
-    return lsvt_data
+    return lsvt_data 
 
+def get_icidar_data_dir(out_put_dir):
+    icdr_data = os.path.join(out_put_dir, "icdar_data")
+    return icdr_data
+
+def get_mask_data_dir(out_put_dir):
+    mask_data = os.path.join(out_put_dir, "mask_data")
+    return mask_data
 
 def gen_all_pic():
     """
-    生成全部图片
+    Generate all pictures
     :return:
     """
     from service import conf
     gen_count = conf['base']['count_per_process']
+
 
     index = 0
     while index < gen_count:
         log.info("-" * 20 + " generate new picture {index}/{gen_count}".format(index=index,
                                                                                gen_count=gen_count) + "-" * 20)
         dump_data = gen_pic()
-        # 写入label
+        # Write label
         if dump_data:
             add_label_data(dump_data)
-            # 生成voc
+            # Write voc
             if conf['base']['gen_voc']:
                 gen_voc(dump_data)
-                index += 1
+                # index += 1
 
             if conf['base']['gen_lsvt']:
                 gen_lsvt(dump_data)
-                index += 1
+                # index += 1            
+                # 
+            if conf['base']['gen_icdar']:
+                gen_icdar(dump_data)
+                # index += 1
 
+        index += 1
 
 def gen_pic():
     from service import layout_provider
@@ -106,7 +121,7 @@ def add_label_data(layout_data):
 
 def gen_voc(layout_data):
     """
-    生成voc数据集
+    Generate voc data set
     :return:
     """
     from service import conf
@@ -123,11 +138,11 @@ def gen_voc(layout_data):
     pic_path = os.path.join(pic_dir, pic_name)
     pic_save_to_path = os.path.join(voc_img_dir, pic_name)
 
-    # 拷贝图片
+    # Copy picture
     shutil.copy(pic_path, pic_save_to_path)
     log.info("copy img success")
 
-    # 生成标签文本
+    # Generate label text
     _gen_voc(voc_xml_dir, data=layout_data)
 
     log.info("voc data gen success")
@@ -182,12 +197,110 @@ def _gen_voc(save_dir, data, image_format='png'):
         node_ymax = SubElement(node_bndbox, 'ymax')
         node_ymax.text = str(fragment['box'][3])
 
-    xml = tostring(node_root, pretty_print=True)  # 格式化显示，该换行的换行
+    xml = tostring(node_root, pretty_print=True) # Format display, the newline of the newline
 
     save_xml = os.path.join(save_dir, data['pic_name'].replace(image_format, 'xml'))
     with open(save_xml, 'wb') as f:
         f.write(xml)
 
+
+def imwrite(path, img):
+    try:
+        print(path)
+        cv2.imwrite(path, img)
+    except Exception as ident:
+        print(ident)
+
+def gen_icdar(layout_data):
+    """
+    Generate ICDAR format
+    :param layout_data:
+    :return:
+    """
+
+    # mask_img = Image.new('RGBA', self.bg_img.size, (255, 255, 255, 0))
+    # name = hashlib.sha1(mask_img.tobytes()).hexdigest()
+    # pic_name = "pic_" + name + ".png"
+    # pic_dir ='/tmp/pics2'
+
+    # # convert from RGBA->RGB 
+    # background = Image.new('RGB', mask_img.size, (255,255,255))
+    # background.paste(mask_img, mask = mask_img.split()[3])
+    # inv_img = ImageOps.invert(background)
+
+    # pic_path = os.path.join(pic_dir, pic_name)
+    # with open(pic_path, 'wb') as f:
+    #     inv_img.save(f, "png")
+
+
+    print ("Generating ICDAR dataformat")
+    from service import conf
+    out_put_dir = conf['provider']['layout']['out_put_dir']
+    icdr_data_dir = get_icidar_data_dir(out_put_dir=out_put_dir)
+    icdar_data_img_dir = os.path.join(icdr_data_dir)
+    os.makedirs(icdar_data_img_dir, exist_ok=True)
+
+    pic_dir = get_pic_dir(out_put_dir)
+    pic_name = layout_data['pic_name']
+    pic_path = os.path.join(pic_dir, pic_name)
+    pic_save_to_path = os.path.join(icdar_data_img_dir, pic_name)
+    # Copy picture
+    # shutil.copy(pic_path, pic_save_to_path)
+
+    im = cv2.imread(pic_path, cv2.IMREAD_GRAYSCALE)
+    bin = cv2.threshold(im, 128, 255, cv2.THRESH_BINARY)[1]
+    imwrite(pic_save_to_path, bin)
+    log.info("copy img success")
+    # Generate label text
+    # _gen_icdar(layout_data)
+    name = pic_name.split('.')[0]
+    icidar_label_path = os.path.join(icdr_data_dir, "gt_{name}.txt".format(name=name))
+    log.info("ICIDAR data gen success")
+    # _x0, _y0, _x1, _y1,_x2, _y2, _x3, _y3, txt
+    fragment_list = layout_data['fragment']
+    
+    with open(icidar_label_path, 'w') as f:
+        for fragment in fragment_list:
+            txt = fragment['data']
+            rotate_box = fragment['rotate_box']
+            char_boxes = fragment['char_boxes']
+            contour = np.array(char_boxes, dtype=np.int) 
+            
+            # print('--' * 80)
+            # print (rotate_box)
+            # # print (char_boxes)
+            # print('--' * 25)
+            # for box in char_boxes:
+            #     print(box)
+
+            min_x = np.amin(contour[:,:,0])
+            max_x = np.amax(contour[:,:,0])
+            min_y = np.amin(contour[:,:,1])
+            max_y = np.amax(contour[:,:,1])
+            
+            w = max_x - min_x
+            h = max_y - min_y
+            _x0, _y0 = min_x, min_y
+            _x1, _y1 = min_x, min_y+h
+            _x2, _y2= min_x+w, min_y+h
+            _x3, _y3= min_x+w, min_y 
+
+            print("{},{},{},{},{},{},{},{},{}".format(_x0, _y0, _x1, _y1, _x2, _y2,  _x3, _y3, txt))
+            f.write("{},{},{},{},{},{},{},{},{}\n".format(_x0, _y0, _x1, _y1, _x2, _y2,  _x3, _y3, txt))
+            continue
+            # vmin = np.amin(char_boxes, axis=1)
+            print('****')
+            print("{},{},{},{} : {}, {}".format(min_x, max_x, min_y, max_y, w, h))
+            # mar = cv2.minAreaRect(contour)
+
+            os.system.exit()
+            # print (char_boxes)
+            # print("txt = {txt} : {box}".format(txt=txt, box=box))
+            _x0, _y0 = rotate_box[0][0], rotate_box[0][1]
+            _x1, _y1 = rotate_box[1][0], rotate_box[1][1]
+            _x2, _y2 = rotate_box[2][0], rotate_box[2][1]
+            _x3, _y3 = rotate_box[3][0], rotate_box[3][1]
+            f.write("{},{},{},{},{},{},{},{},{}\n".format(_x0, _y0, _x1, _y1, _x2, _y2,  _x3, _y3, txt))
 
 def gen_lsvt(layout_data):
     """
@@ -207,10 +320,10 @@ def gen_lsvt(layout_data):
     pic_name = layout_data['pic_name']
     pic_path = os.path.join(pic_dir, pic_name)
     pic_save_to_path = os.path.join(lsvt_data_img_dir, pic_name)
-    # 拷贝图片
+    # Copy picture
     shutil.copy(pic_path, pic_save_to_path)
     log.info("copy img success")
-    # 生成标签文本
+    # Generate label text
     _gen_lsvt(layout_data, lsvt_json_path)
     log.info("voc data gen success")
 
