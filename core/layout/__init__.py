@@ -306,7 +306,7 @@ class Layout:
         :return:
         """
         for index, block_group in enumerate(self.block_group_list):
-            log.info("start append block ---- {index} ----".format(index=index))
+            # log.info("start append block ---- {index} ----".format(index=index))
             block_group.auto_append_block()
         self.render()
 
@@ -339,7 +339,8 @@ class Layout:
             # convert from RGBA->RGB 
             background = Image.new('RGB', mask_img.size, (255,255,255))
             background.paste(mask_img, mask = mask_img.split()[3])
-            inv_img = ImageOps.invert(background)
+            inv_img = background
+            # inv_img = ImageOps.invert(background)
       
             print(fragment_img)
             print(inv_img)
