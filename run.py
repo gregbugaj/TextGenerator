@@ -117,13 +117,13 @@ if __name__ == '__main__':
     # directory_resize(src, dst, (1024, 1024))
 
 
-    src = '/home/greg/dev/TextGenerator/output/icdar_data'
-    dst = '/home/greg/dev/TextGenerator/output/resized_1024/image'
+    # src = '/home/greg/dev/TextGenerator/output/icdar_data'
+    # dst = '/home/greg/dev/TextGenerator/output/resized_1024/image'
 
-    directory_resize(src, dst, (1024, 1024))
+    # directory_resize(src, dst, (1024, 1024))
 
-    src = '/home/greg/dev/TextGenerator/output/mask_data'
-    dst = '/home/greg/dev/TextGenerator/output/resized_1024/mask'
-    directory_resize(src, dst, (1024, 1024))
+    # src = '/home/greg/dev/TextGenerator/output/mask_data'
+    # dst = '/home/greg/dev/TextGenerator/output/resized_1024/mask'
+    # directory_resize(src, dst, (1024, 1024))
 
 

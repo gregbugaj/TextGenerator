@@ -1,12 +1,13 @@
 base:
   # Number of processes started
-  process_count: 2
+  process_count: 1
   # Number of pictures generated in each process
-  count_per_process: 3
+  count_per_process: 15
   # Whether to generate voc data rate
   gen_voc: False
   gen_lsvt: False
-  gen_icdar: True
+  gen_icdar: False
+  gen_coco: True
 
 provider:
   # Select the configuration of the corpus
@@ -23,7 +24,7 @@ provider:
       
   # Candidate area generation configuration
   smooth_area:
-    down_scale: 16 
+    down_scale: 64
     anchor_ratio: (0.17, 0.25, 0.5, 1.0, 2.0, 4.0, 6)
     anchor_scale: (8, 16, 24, 32, 48, 64, 72, 90)
 
@@ -45,7 +46,7 @@ provider:
     # Text map json information output path
     text_img_info_output_dir: output/text_img_info
     # Font size
-    font_min_size: 18
+    font_min_size: 12
     # Maximum font size
     font_max_size: 32
     # The probability of using the specified color as the text color (as opposed to automatically picking the color)
@@ -75,4 +76,3 @@ provider:
         probability: 0.5
       # - name: RandomPasteStrategy
       #   probability: 0.2
-

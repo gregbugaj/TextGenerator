@@ -341,9 +341,7 @@ class Layout:
             background.paste(mask_img, mask = mask_img.split()[3])
             inv_img = background
             # inv_img = ImageOps.invert(background)
-      
-            print(fragment_img)
-            print(inv_img)
+
             if isinstance(block, TextBlock):
                 char_boxes = block.get_char_boxes()
                 orientation = block.get_orientation()
