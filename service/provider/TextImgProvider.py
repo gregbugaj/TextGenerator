@@ -196,6 +196,9 @@ class TextImgProvider(NextBlockGenerator):
             # Generate text image
             align = Random.random_choice_list(
                 [TYPE_ALIGN_MODEL_B, TYPE_ALIGN_MODEL_T, TYPE_ALIGN_MODEL_C])
+            text = "XYZ"
+            font_size = 32
+            align = 0
             text_img = self.gen_text_img(text,
                                          font_size=font_size,
                                          border_width=self.char_border_width,

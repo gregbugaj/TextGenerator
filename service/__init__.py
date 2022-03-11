@@ -55,6 +55,11 @@ def run():
 
 def start():
     init()
+
+    # TODO:REMOVEME
+    run()
+    return
+
     process_count = conf['base']['process_count']
     print('Parent process {pid}.'.format(pid=os.getpid()))
     print('process count : {process_count}'.format(process_count=process_count))

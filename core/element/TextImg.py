@@ -1,5 +1,8 @@
 import cv2
 from typing import List
+
+from PIL.ImageFont import FreeTypeFont
+
 from core.element.BaseImg import BaseImg
 from core.element.CharImg import CharImg
 from PIL import Image, ImageFont, ImageDraw
@@ -18,6 +21,60 @@ TYPE_ALIGN_MODEL_B = 0  # Text alignment mode: bottom/left alignment
 TYPE_ALIGN_MODEL_C = 1  # Text alignment mode: center alignment
 TYPE_ALIGN_MODEL_T = 2  # Text alignment mode: top/right alignment
 
+
+class FreeTypeFontGB(FreeTypeFont):
+    def __init__(self, *args, **kwargs):
+        print('TT')
+        super().__init__(*args, **kwargs)
+
+    def getsize(self, text, direction=None, features=None, language=None, stroke_width=0):
+        print("Size ****")
+        size = super().getsize(text)
+        offset = self.getoffset(text)
+        stroke_width = 0
+        adj_size = (size[0] + stroke_width * 2, size[1] + stroke_width * 2 - offset[1],)
+        return adj_size
+
+    def getbbox(
+        self,
+        text,
+        mode="",
+        direction=None,
+        features=None,
+        language=None,
+        stroke_width=0,
+        anchor=None,
+    ):
+        print('Bounding box ***')
+        size = self.getsize(text)
+        # offset = self.getoffset(text)
+        offset = (0, 60)
+        stroke_width = 0
+        left, top = offset[0] - stroke_width, offset[1] - stroke_width
+        width, height = size[0] + 2 * stroke_width, size[1] + 2 * stroke_width
+        return left, top, left + width, top + height
+
+def getsize(txt: str, font: str, font_size: int):
+    ttf = ImageFont.truetype(font, font_size)
+    size = ttf.getsize(txt)
+    offset = ttf.getoffset(txt)
+    stroke_width = 0
+    adj_size = (size[0] + stroke_width * 2, size[1] + stroke_width * 2 - offset[1],)
+    return adj_size
+
+def getbbox(txt: str, font: str, font_size: int):
+    """
+    Returns bounding box (in pixels) of given text
+    :return: ``(left, top, right, bottom)`` bounding box
+    """
+    size = getsize(txt, font, font_size)
+    ttf = ImageFont.truetype(font, font_size)
+    offset = ttf.getoffset(txt)
+    offset = (0, 0)
+    stroke_width = 0
+    left, top = offset[0] - stroke_width, offset[1] - stroke_width
+    width, height = size[0] + 2 * stroke_width, size[1] + 2 * stroke_width
+    return left, top, left + width, top + height
 
 class TextImg(BaseImg):
     """
@@ -143,7 +200,6 @@ def load_img(img_path):
     assert os.path.exists(img_path), "image is not exist, please check. {img_path}".format(img_path=img_path)
     return Image.open(img_path)
 
-
 def calc_bg_size(font_path: str,
                  orientation: int,
                  char_obj_list: List[CharImg],
@@ -168,12 +224,19 @@ def calc_bg_size(font_path: str,
     bg_h = 0
 
     for index, char_obj in enumerate(char_obj_list):
-        font = ImageFont.truetype(font_path, size=char_obj.font_size)
+        # font = ImageFont.truetype(font_path, size=char_obj.font_size)
+        font = FreeTypeFontGB(font_path, size=char_obj.font_size)
 
         char_bg_w = 0
         char_bg_h = 0
         try:
             char_bg_w, char_bg_h = font.getsize(char_obj.char)
+            bbox = font.getbbox(char_obj.char)
+
+            char_bg_w, char_bg_h = getsize(char_obj.char, font_path, char_obj.font_size)
+            bbox = getbbox(char_obj.char, font_path, char_obj.font_size)
+
+            print(f'char : {char_obj.char} , {char_bg_h} x {char_bg_w} : {bbox}')
 
             # Add border size
             char_bg_w += char_obj.border_width * 2
@@ -253,7 +316,8 @@ def draw_text(font_path, bg_w, bg_h, orientation, char_obj_list: List[CharImg], 
     tmp_char = None
     l, t = 0, 0
     for index, char_obj in enumerate(char_obj_list):
-        font = ImageFont.truetype(font_path, size=char_obj.font_size)
+        # font = ImageFont.truetype(font_path, size=char_obj.font_size)
+        font = FreeTypeFontGB(font_path, size=char_obj.font_size)
 
         cw, ch = char_obj.size
 
@@ -296,9 +360,9 @@ def draw_text(font_path, bg_w, bg_h, orientation, char_obj_list: List[CharImg], 
                 l += padding[0]
             char_obj.box = [l, t, l + cw, t + ch]
 
-        # log.info("draw text >> {text} color: {color} font: {font}".format(text=char_obj.char,
-        #                                                                   color=char_obj.color,
-        #                                                                   font=font))
+        log.info("draw text >> {text} color: {color} box: {box}".format(text=char_obj.char,
+                                                                          color=char_obj.color,
+                                                                          box=char_obj.box))
         draw.text((l + char_obj.border_width, t + char_obj.border_width),
                   text=char_obj.char,
                   fill=char_obj.color,
@@ -357,7 +421,12 @@ def create(char_obj_list: List[CharImg],
     bg_w, bg_h, padding = calc_bg_size(font_path, orientation, char_obj_list, spacing_rate, padding,
                                        auto_padding_to_ratio)
 
+    print(f'Final bg_w / bg_h = {bg_w}, {bg_h}')
     img = draw_text(font_path, bg_w, bg_h, orientation, char_obj_list, spacing_rate, align_mode, padding)
+
+    print(f'Final bg_w / bg_h = {bg_w}, {bg_h}')
+    print(f'Final draw_text img.size= {img.size}')
+
 
     return TextImg(char_obj_list=char_obj_list,
                    text_img_output_dir=text_img_output_dir,

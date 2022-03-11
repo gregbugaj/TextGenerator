@@ -2,7 +2,7 @@ base:
   # Number of processes started
   process_count: 1
   # Number of pictures generated in each process
-  count_per_process: 15
+  count_per_process: 1
   # Whether to generate voc data rate
   gen_voc: False
   gen_lsvt: False
@@ -20,7 +20,7 @@ provider:
       # How to read the corpus (read line by line: line, read word by word: word)
       type: line
       # Generated text length interval
-      len_range: (1,32)
+      len_range: (1,4)
       
   # Candidate area generation configuration
   smooth_area:

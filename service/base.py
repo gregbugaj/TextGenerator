@@ -100,7 +100,7 @@ def gen_pic():
 
     if not layout.is_empty():
         dump_data = layout.dump()
-        # layout.show(draw_rect=True)
+        layout.show(draw_rect=True)
         return dump_data
     else:
         log.info("-" * 10 + "layout is empty" + "-" * 10)

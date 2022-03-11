@@ -202,10 +202,10 @@ class BlockGroup:
         :param draw_rect:
         :return:
         """
-        bg_img = self.render(draw_rect, on_origin=False)
+        bg_img = self.render(draw_rect, on_origin=True)
         bg_img.show("")
 
-    def render(self, draw_rect=False, on_origin=True):
+    def render(self, draw_rect=True, on_origin=True):
         """
         Rendering
         :param draw_rect:
@@ -233,8 +233,8 @@ class BlockGroup:
             mask_img.paste(img, block.inner_box)
 
             if draw_rect:
-                draw.rectangle(xy=block.outer_box, width=1, outline=const.COLOR_RED)
-                draw.rectangle(xy=block.inner_box, width=1, outline=const.COLOR_GREEN)
+                # draw.rectangle(xy=block.outer_box, width=1, outline=const.COLOR_RED)
+                # draw.rectangle(xy=block.inner_box, width=1, outline=const.COLOR_GREEN)
                 rotate_rect = block.img_rotate_box.tolist()
                 rotate_rect_tuple = list()
                 for point in rotate_rect:
