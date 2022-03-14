@@ -223,7 +223,7 @@ class BlockGroup:
                 bg_img = self.bg_img.copy()
         draw = ImageDraw.Draw(bg_img, mode)
 
-        mask_img = self.bg_img.copy()
+        # mask_img = self.bg_img.copy()
         mask_img = Image.new('RGBA', self.bg_img.size, (255, 255, 255, 0))
 
         for block in self.block_list:
@@ -233,8 +233,8 @@ class BlockGroup:
             mask_img.paste(img, block.inner_box)
 
             if draw_rect:
-                # draw.rectangle(xy=block.outer_box, width=1, outline=const.COLOR_RED)
-                # draw.rectangle(xy=block.inner_box, width=1, outline=const.COLOR_GREEN)
+                draw.rectangle(xy=block.outer_box, width=1, outline=const.COLOR_RED)
+                draw.rectangle(xy=block.inner_box, width=2, outline=const.COLOR_GREEN)
                 rotate_rect = block.img_rotate_box.tolist()
                 rotate_rect_tuple = list()
                 for point in rotate_rect:
@@ -263,9 +263,10 @@ class BlockGroup:
         background.paste(mask_img, mask = mask_img.split()[3])
         inv_img = ImageOps.invert(background)
 
-        pic_path = os.path.join(pic_dir, pic_name)
-        with open(pic_path, 'wb') as f:
-            inv_img.save(f, "png")
+        # DEBUG: Invert image
+        # pic_path = os.path.join(pic_dir, pic_name)
+        # with open(pic_path, 'wb') as f:
+        #     inv_img.save(f, "png")
 
         return sub_img, inv_img
 
@@ -421,10 +422,11 @@ class Layout:
             fragment['fragment_name'] = fragment_img_name
             result['fragment'].append(fragment)
 
-
-        mask_path = os.path.join(mask_dir, pic_name)
-        with open(mask_path, 'wb') as f:
-            mask_img.save(f)
+        # DEBUG : not saving mask currently
+        if False:
+            mask_path = os.path.join(mask_dir, pic_name)
+            with open(mask_path, 'wb') as f:
+                mask_img.save(f)
 
         json_file_name = name + ".json"
         json_file_path = os.path.join(data_dir, json_file_name)

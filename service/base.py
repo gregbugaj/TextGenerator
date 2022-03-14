@@ -100,7 +100,7 @@ def gen_pic():
 
     if not layout.is_empty():
         dump_data = layout.dump()
-        layout.show(draw_rect=True)
+        # layout.show(draw_rect=True)
         return dump_data
     else:
         log.info("-" * 10 + "layout is empty" + "-" * 10)
@@ -140,6 +140,7 @@ def gen_coco(layout_data):
     Generate COCO data set
     :return:
     """
+
     global IMAGE_INDEX
 
     print(f'INDEX :: {IMAGE_INDEX}')
@@ -213,9 +214,8 @@ def _gen_coco(layout_data, json_path):
 
     load_dict["images"].append(img_info)
 
-
     with open(json_path, 'w') as f:
-        annon_dict_list = load_dict["annotations"]
+        annotations_dict_list = load_dict["annotations"]
 
         for fragment in fragment_list:
             # print(fragment)
@@ -227,12 +227,12 @@ def _gen_coco(layout_data, json_path):
             hash_object = hashlib.sha256(str(fragment_name).encode('utf-8'))
             fid = hash_object.hexdigest()
 
-            rotate_rect_tuple = []
-            rotate_rect_tupleXX = []
+            rect_tuple = []
             for point in rotate_box:
-                rotate_rect_tuple.append(point[0])
-                rotate_rect_tuple.append(point[1])
+                rect_tuple.append(point[0])
+                rect_tuple.append(point[1])
 
+            # BBox is created from the character boxes
             contour = np.array(char_boxes, dtype=np.int)
             min_x = np.amin(contour[:, :, 0])
             max_x = np.amax(contour[:, :, 0])
@@ -246,21 +246,103 @@ def _gen_coco(layout_data, json_path):
             _x2, _y2 = min_x + w, min_y + h
             _x3, _y3 = min_x + w, min_y
 
-            # print('****')
-            print("{},{},{},{} : {}, {}".format(min_x, max_x, min_y, max_y, w, h))
-
+            # print("{},{},{},{} : {}, {}".format(min_x, max_x, min_y, max_y, w, h))
+            # main word
             img_info = {
                 "id": fid,
                 "image_id": pic_name,
                 "category_id": 1,
-                # "segmentation": [[490.29, 333.78, 609.52, 333.54, 609.76, 357.73, 489.34, 356.77]],
-                # "bbox": [489.34, 333.54, 120.42, 24.19]
-                "segmentation_boxed": [[int(_x0), int(_y0), int(_x1), int(_y1), int(_x2), int(_y2), int(_x3), int(_y3)]],
-                "segmentation": [rotate_rect_tuple],
+                "segmentation_boxed": [
+                    [int(_x0), int(_y0), int(_x1), int(_y1), int(_x2), int(_y2), int(_x3), int(_y3)]],
+                "segmentation": [rect_tuple],
                 "bbox": [int(min_x), int(min_y), int(w), int(h)]
             }
 
-            annon_dict_list.append(img_info)
+            annotations_dict_list.append(img_info)
+
+            # Character level segmentation
+            category_map = {
+                '0': 2,
+                '1': 3,
+                '2': 4,
+                '3': 5,
+                '4': 6,
+                '5': 7,
+                '6': 8,
+                '7': 9,
+                '8': 10,
+                '9': 11,
+                'A': 12,
+                'B': 13,
+                'C': 14,
+                'D': 15,
+                'E': 16,
+                'F': 17,
+                'G': 18,
+                'H': 19,
+                'I': 20,
+                'J': 21,
+                'K': 22,
+                'L': 23,
+                'M': 24,
+                'N': 25,
+                'O': 26,
+                'P': 27,
+                'Q': 28,
+                'R': 29,
+                'S': 30,
+                'T': 31,
+                'U': 32,
+                'V': 33,
+                'W': 34,
+                'X': 35,
+                'Y': 36,
+                'Z': 37,
+            }
+
+            for i, _char in enumerate(txt):
+                index = -1
+                if _char in category_map:
+                    index = i
+
+                if index > -1:
+                    category_id = category_map[_char]
+                    print(f' ::: {i}, {_char}  ,  {category_id}')
+                    char_box = char_boxes[index]
+                    print(char_box)
+
+                    rect_tuple = []
+                    for point in char_box:
+                        rect_tuple.append(point[0])
+                        rect_tuple.append(point[1])
+
+                    contour = np.array([char_box], dtype=np.int)
+                    min_x = np.amin(contour[:, :, 0])
+                    max_x = np.amax(contour[:, :, 0])
+                    min_y = np.amin(contour[:, :, 1])
+                    max_y = np.amax(contour[:, :, 1])
+
+                    w = max_x - min_x
+                    h = max_y - min_y
+                    _x0, _y0 = min_x, min_y
+                    _x1, _y1 = min_x, min_y + h
+                    _x2, _y2 = min_x + w, min_y + h
+                    _x3, _y3 = min_x + w, min_y
+
+                    print("{},{},{},{} : {}, {}".format(min_x, max_x, min_y, max_y, w, h))
+
+                    char_info = {
+                        "id": f'{fid}_{i}',
+                        "image_id": pic_name,
+                        "category_id": category_id,
+                        "segmentation_boxed": [
+                            [int(_x0), int(_y0), int(_x1), int(_y1), int(_x2), int(_y2), int(_x3), int(_y3)]],
+                        "segmentation": [rect_tuple],
+                        "bbox": [int(min_x), int(min_y), int(w), int(h)]
+                    }
+
+                    annotations_dict_list.append(char_info)
+
             ANNOTATION_INDEX += 1
 
         json.dump(load_dict, f, indent=4)

@@ -1,3 +1,4 @@
+import numpy as np
 from PIL import ImageDraw, ImageFont
 from PIL import Image
 
@@ -5,6 +6,8 @@ import service
 import argparse
 import os
 import cv2
+
+from core.element.TextImg import FreeTypeFontOffset
 
 
 def image_resizeXXXX(image, width=None, height=None, inter=cv2.INTER_AREA):
@@ -46,7 +49,6 @@ def resize_and_frameXXX(image, width, height, color=255):
     l_img[y_offset:y_offset + s_img.shape[0], x_offset:x_offset + s_img.shape[1]] = s_img
 
     return l_img
-
 
 def resize_image(image, desired_size, color=(255, 255, 255)):
     ''' Helper function to resize an image while keeping the aspect ratio.
@@ -109,32 +111,63 @@ def directory_resize(dir_src, dir_dest, desired_size):
         except Exception as e:
             print(e)
 
+def get_alpha_mask(img):
+    r, g, b, a = img.split()
+    return a
 
-def getSize(txt: str, font: str, font_size: int):
-    ttf = ImageFont.truetype(font, font_size)
-    size = ttf.getsize(txt)
-    offset = ttf.getoffset(txt)
-    stroke_width = 0
-    adj_size = (size[0] + stroke_width * 2, size[1] + stroke_width * 2 - offset[1],)
-    return adj_size
+def get_rotate_box(img):
+    alpha = get_alpha_mask(img)
+    alpha = np.asarray(alpha, np.uint8)
+
+    points = np.argwhere(alpha > 0)
+    points = points[:, ::-1]
+    print(len(points))
+    rotate_rect = cv2.minAreaRect(points)
+    rotate_rect_point = cv2.boxPoints(rotate_rect)
+    rotate_rect_point = rotate_rect_point.astype(np.int32)
+    return rotate_rect_point
 
 def test_textsize_equal():
-    font_size = 80
-    font = './assets/font/FreeMono.ttf'
-    im = Image.new(mode='RGB', size=(300, 100))
+    font_size = 85
+    font_path = './assets/font/FreeMono.ttf'
+
+    im = Image.new(mode='RGBA', size=(300, 100), color=(0, 0, 0))
+    # im = Image.new(mode='RGBA', size=(300, 100), color=(0, 0, 0, 0))
     draw = ImageDraw.Draw(im)
-    ttf = ImageFont.truetype(font, font_size)
+    ttf = FreeTypeFontOffset(font_path, size=font_size)
 
-    txt = "AA"
+    txt = "7"
     size = draw.textsize(txt, ttf)
-    size = (96, 90)
-    size = getSize(txt, font, font_size)
-    draw.text((0, 0), txt, font=ttf)
-    draw.rectangle((0, 0, size[0], size[1]))
-
-    im.save('/tmp/rectangle_surrounding_text.png')
+    xy = (10, 10)
+    draw.text(xy, txt, font=ttf)
+    # draw.rectangle((xy[0], xy[1], xy[0]+size[0], xy[1]+size[1]))
+    bbox = ttf.getbbox(txt)
 
     print(size)
+    print(bbox)
+    im.save('/home/greg/dev/TextGenerator/rectangle_surrounding_text.png')
+
+    image = cv2.imread('/home/greg/dev/TextGenerator/rectangle_surrounding_text.png')
+    # convert the image to grayscale format
+    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    thresh = img_gray
+    # ret, thresh = cv2.threshold(img_gray, 150, 255, cv2.THRESH_BINARY)
+
+    # detect the contours on the binary image using cv2.CHAIN_APPROX_NONE
+    contours, hierarchy = cv2.findContours(image=thresh, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_SIMPLE)
+
+    print(f'contours len : {len(contours)}')
+    print(len(contours[0]))
+    # draw contours on the original image
+    image_copy = image.copy()
+    cv2.drawContours(image=image_copy, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=1,
+                     lineType=cv2.LINE_AA)
+
+    # see the results
+    cv2.imshow('None approximation', image_copy)
+    cv2.waitKey(0)
+    cv2.imwrite('contours_none_image1.png', image_copy)
+    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
