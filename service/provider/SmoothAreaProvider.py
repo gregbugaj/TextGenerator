@@ -110,6 +110,7 @@ class SmoothAreaProvider(object):
         image_process = cv2.resize(image_process, (new_w, new_h))
         anchors, length = self.generate_anchors_pre(new_h, new_w)
 
+
         # key_points = self._fast.detect(image_process, None)
         kp_image = cv2.Canny(image_process, 50, 150) // 255
         sum_arr = np.zeros((new_h, new_w), np.float32)

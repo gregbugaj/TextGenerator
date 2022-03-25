@@ -134,7 +134,7 @@ class TextImgProvider(NextBlockGenerator):
         :return:
         """
         char_common_color_list = self.char_common_color_list
-        
+
         if Random.random_float(0, 1) <= self.use_char_common_color_probability and char_common_color_list:
             return eval(Random.random_choice_list(char_common_color_list))
         else:
@@ -163,7 +163,16 @@ class TextImgProvider(NextBlockGenerator):
         :return:
         """
         from service import text_provider
+        import string
+        import random
         text = "".join(text_provider.gen.__next__())
+
+        # GB : Mod
+        if np.random.choice([0, 1], p=[0.5, 0.5]):
+            letters = string.digits
+            c = np.random.randint(1, 9)
+            text = (''.join(random.choice(letters) for i in range(c)))
+
         fp = self.next_font_path()
 
         if isinstance(strategy, HorizontalStrategy):
@@ -225,6 +234,7 @@ if __name__ == '__main__':
 
     init_config()
     from service import text_img_provider
+
     fp = text_img_provider.next_font_path()
 
     p = text_img_provider.gen_text_img("hello world", color=const.COLOR_BLUE, font_path=fp)

@@ -60,8 +60,8 @@ class RandomCorpusGen(object):
             elif len(char_str) < self._len_range[0]:
                 char_str = self._random_add(char_str)
             
-            if True:
-                yield char_str.upper()
+            # if True:
+            #     yield char_str.upper()
 
             if random.randint(0, 6) >= 3:
                 yield char_str
