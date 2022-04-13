@@ -168,10 +168,11 @@ class TextImgProvider(NextBlockGenerator):
         text = "".join(text_provider.gen.__next__())
 
         # GB : Mod
-        if np.random.choice([0, 1], p=[0.5, 0.5]):
+        if True or np.random.choice([0, 1], p=[0.5, 0.5]):
             letters = string.digits
-            c = np.random.randint(1, 9)
-            text = (''.join(random.choice(letters) for i in range(c)))
+            c = np.random.randint(0, 12)
+            text = (''.join(random.choice(letters) for i in range(0,c)))
+ 
 
         fp = self.next_font_path()
 
@@ -201,7 +202,7 @@ class TextImgProvider(NextBlockGenerator):
 
         # Eliminate non-existent text
         text = "".join(filter(lambda c: font_tool.check(c, font_path=fp), text))
-        if len(text) >= 2:
+        if len(text) >= 1:
             # Generate text image
             align = Random.random_choice_list(
                 [TYPE_ALIGN_MODEL_B, TYPE_ALIGN_MODEL_T, TYPE_ALIGN_MODEL_C])
@@ -252,3 +253,4 @@ if __name__ == '__main__':
 
     print(bg_w)
     print(bg_h)
+
