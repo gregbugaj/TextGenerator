@@ -179,14 +179,15 @@ class BackgroundImageAugmentor(object):
 
     def augment(self, img):
 
-        if True:
-            return img
+        # if True:
+        #     return img
         noisy_img = img.copy()
         h = noisy_img.shape[0]
         w = noisy_img.shape[1]
 
-        noise = cv2.threshold(noisy_img, 128, 255, cv2.THRESH_BINARY)[1]
-        return noise
+        # noise = cv2.threshold(noisy_img, 128, 255, cv2.THRESH_BINARY)[1]
+        noise = noisy_img
+        # return noise
         print('Augmenting image : {}'.format(noisy_img.shape))
 
         vertical_bool = {'left': np.random.choice([0,1], p =[0.3, 0.7]), 'right': np.random.choice([0,1])} # [1 or 0, 1 or 0] whether to make vertical left line on left and right side of the image
