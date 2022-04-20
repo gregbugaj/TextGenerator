@@ -45,7 +45,9 @@ def init():
     init_config()
 
 
-def run():
+def run(name, que):
+    que.put("%d is done" % name)
+
     try:
         from service.base import gen_all_pic
         gen_all_pic()
@@ -55,22 +57,28 @@ def run():
 
 def start():
     init()
-
-    # TODO:REMOVEME
-    run()
-    return
+    #
+    # # TODO:REMOVEME
+    # run()
+    # return
 
     process_count = conf['base']['process_count']
     print('Parent process {pid}.'.format(pid=os.getpid()))
     print('process count : {process_count}'.format(process_count=process_count))
 
-    p = Pool(process_count)
+    import multiprocessing
+
+    p = multiprocessing.Pool(process_count)
+    m = multiprocessing.Manager()
+    q = m.Queue()
+
     for i in range(process_count):
-        p.apply_async(run)
+        p.apply_async(run, (i, q))
     print('Waiting for all subprocesses done...')
     p.close()
     p.join()
     print('All subprocesses done.')
+    print(q)
 
 
 if __name__ == '__main__':

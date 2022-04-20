@@ -172,17 +172,20 @@ def test_textsize_equal():
 
 
 if __name__ == '__main__':
-    smooth = SmoothAreaProvider(down_scale=64,
-                 anchor_ratio=(0.17, 0.25, 0.5, 1.0, 2.0, 3.0, 4),
-                 anchor_scale=(4, 8, 16, 24, 32, 48, 64, 72)
-    )
-    image = cv2.imread("/home/gbugaj/devio/TextGenerator/assets/img/PID_10_5_0_2787.original.redacted.tif")
-    rects = smooth.get_image_rects(image)
-    for rect in rects:
-        cv2.rectangle(image, (rect[0], rect[1]), (rect[2], rect[3]), (120, 78, 255), 2)
-    cv2.imwrite('test.jpg', image)
-    # cv2.imshow("test", image)
-    # cv2.waitKey(0)
+
+    if False:
+        smooth = SmoothAreaProvider(down_scale=64,
+                     anchor_ratio=(0.17, 0.25, 0.5, 1.0, 2.0, 3.0, 4),
+                     anchor_scale=(4, 8, 16, 24, 32, 48, 64, 72)
+        )
+        image = cv2.imread("/home/gbugaj/devio/TextGenerator/assets/img/001.png")
+        rects = smooth.get_image_rects(image)
+        print(rects)
+        for rect in rects:
+            cv2.rectangle(image, (rect[0], rect[1]), (rect[2], rect[3]), (120, 78, 255), 2)
+        cv2.imwrite('test.jpg', image)
+        # cv2.imshow("test", image)
+        # cv2.waitKey(0)
 
     # test_textsize_equal()
     service.start()

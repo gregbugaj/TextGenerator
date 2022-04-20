@@ -168,11 +168,10 @@ class TextImgProvider(NextBlockGenerator):
         text = "".join(text_provider.gen.__next__())
 
         # GB : Mod
-        if True or np.random.choice([0, 1], p=[0.5, 0.5]):
+        if np.random.choice([0, 1], p=[0.5, 0.5]):
             letters = string.digits
             c = np.random.randint(0, 12)
-            text = (''.join(random.choice(letters) for i in range(0,c)))
- 
+            text = (''.join(random.choice(letters) for i in range(0, c)))
 
         fp = self.next_font_path()
 
@@ -253,4 +252,3 @@ if __name__ == '__main__':
 
     print(bg_w)
     print(bg_h)
-

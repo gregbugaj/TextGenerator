@@ -98,6 +98,7 @@ class SmoothAreaProvider(object):
             raise ValueError("wrong image format")
 
         src_h, src_w = image_process.shape[:2]
+
         if src_h > src_w:
             new_h = int(long_side)
             scale = src_h / long_side
@@ -107,7 +108,9 @@ class SmoothAreaProvider(object):
             scale = src_w / long_side
             new_h = int(src_h / scale)
 
+        image_process = np.zeros((src_h,src_w, 3), np.uint8)
         image_process = cv2.resize(image_process, (new_w, new_h))
+
         anchors, length = self.generate_anchors_pre(new_h, new_w)
 
 
