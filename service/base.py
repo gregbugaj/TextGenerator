@@ -146,17 +146,17 @@ def gen_coco(layout_data):
     Generate COCO data set
     :return:
     """
-
     global IMAGE_INDEX
-
     print(f"INDEX :: {IMAGE_INDEX}")
     from service import conf
 
     out_put_dir = conf["provider"]["layout"]["out_put_dir"]
     data_dir = get_coco_data_dir(out_put_dir=out_put_dir)
     data_dir_images = os.path.join(data_dir, "images")
+    data_dir_json = os.path.join(data_dir, "json")
 
     os.makedirs(data_dir_images, exist_ok=True)
+    os.makedirs(data_dir_json, exist_ok=True)
 
     pic_dir = get_pic_dir(out_put_dir)
     pic_name = layout_data["pic_name"]
@@ -169,6 +169,9 @@ def gen_coco(layout_data):
     # Generate label text
     json_path = os.path.join(data_dir, "train_{pid}.json".format(pid=os.getpid()))
     json_path = os.path.join(data_dir, "train.json")
+
+    pic_name_full = layout_data["pic_name"]
+    json_path = os.path.join(data_dir_json, f"{pic_name_full}.json")
 
     _gen_coco(layout_data, json_path)
     log.info("coco data gen success")

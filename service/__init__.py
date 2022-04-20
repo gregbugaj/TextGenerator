@@ -80,7 +80,6 @@ def start():
     print('All subprocesses done.')
     print(q)
 
-
 if __name__ == '__main__':
     init_config()
     print(conf)

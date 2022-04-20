@@ -1,8 +1,8 @@
 base:
   # Number of processes started
-  process_count: 1
+  process_count: 16
   # Number of pictures generated in each process
-  count_per_process: 250
+  count_per_process: 10
   # Whether to generate voc data rate
   gen_voc: False
   gen_lsvt: False
@@ -49,9 +49,9 @@ provider:
     # Text map json information output path
     text_img_info_output_dir: output/text_img_info
     # Font size
-    font_min_size: 20
+    font_min_size: 8
     # Maximum font size
-    font_max_size: 64
+    font_max_size: 32
     # The probability of using the specified color as the text color (as opposed to automatically picking the color)
     use_char_common_color_probability: 1.0
     # Specify the optional color list of the font (when generating the font map, the color will be selected from the following color list as the font color)
